@@ -17,79 +17,67 @@ class Calculator extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      input: [],
-      result: 0
+      formula: [],
+      result: "",
+      temp: []
     };
     this.handleKeyPress = this.handleKeyPress.bind(this);
-    this.handleClick = this.handleClick.bind(this);
+    /*this.handleClick = this.handleClick.bind(this);*/
   }
 
+  /*
   handleClick(event) {
-    switch (event.target.id) {
-      case "clear":
-        this.setState({
-          result: 0,
-          input: []
-        });
-        break;
-
-      case "equals":
-        const expression = this.state.input.join("");
-        const resultValue = eval(expression);
-        this.setState({
-          result: resultValue,
-          input: [resultValue]
-        });
-        break;
-
-      default:
-        if (
-          event.key === "+" ||
-          event.key === "-" ||
-          event.key === "/" ||
-          event.key === "*"
-        ) {
-          this.setState({
-            input: [...this.state.input, event.key],
-            result: this.state.input
-          });
-        } else {
-          this.setState({
-            input: [...this.state.input, event.key],
-            result: event.key
-          });
-        }
-        break;
-    }
-  }
+    //console.log(event.target.getAttribute("data-tip"));
+    const value = parseInt(event.target.getAttribute("data-tip"));
+  }*/
 
   handleKeyPress(event) {
-    //console.log(event.keyCode);
+    console.log(event.keyCode);
     //console.log(event.key);
     switch (event.keyCode) {
+      //enter
       case 13:
-        const expression = this.state.input.join("");
-        const resultValue = eval(expression);
+        const expression = this.state.formula.join("");
+        const resultValue = expression; //eval(expression);
+
         this.setState({
-          result: resultValue,
-          input: [resultValue]
+          temp: [],
+          formula: [],
+          result: resultValue
         });
         break;
-      case 8:
-        this.setState({
-          input: this.state.input.slice(0, this.state.input.length - 1)
-        });
-        break;
+
+      //clear
       case 67:
         this.setState({
-          input: [],
-          result: 0
+          temp: [],
+          formula: [],
+          result: ""
         });
         break;
+
       default:
+        // console.log(event.key);
+        let arr = this.state.temp;
+
         this.setState({
-          input: [...this.state.input, event.key]
+          //temp: [event.key]
+          temp: [...arr, event.key]
         });
+
+        console.log(this.state.temp.join(""));
+
+        //when a new operation sign is added
+        if (event.key === "+" || event.key === "=") {
+          let newArr = this.state.formula;
+
+          this.setState({
+            formula: [this.state.formula, this.state.temp],
+            temp: []
+          });
+
+          console.log(newArr.join(""));
+        }
         break;
     }
   }
@@ -105,17 +93,25 @@ class Calculator extends React.Component {
   render() {
     function createResultHtml(result) {
       return {
-        __html: "<h5>" + result + "</h5>"
+        __html: "<h5> (enter) result: " + result + "</h5>"
       };
     }
+
     function createOperationtHtml(inputArr) {
       return {
-        __html: "<h5>" + inputArr.join("") + "</h5>"
+        __html: "<h5> (on +-/*)operation: " + inputArr.join("") + "</h5>"
       };
     }
+
     const buttonList = nums.map((elem, i) => {
       let item = (
-        <button id={elem} className="num-button" onClick={this.handleClick}>
+        <button
+          id={elem}
+          key={i}
+          className="num-button"
+          data-tip={i}
+          onClick={this.handleClick}
+        >
           {i}
         </button>
       );
@@ -126,12 +122,21 @@ class Calculator extends React.Component {
       <div id="display-div">
         <div
           id="operation"
-          dangerouslySetInnerHTML={createOperationtHtml(this.state.input)}
+          dangerouslySetInnerHTML={createOperationtHtml(this.state.formula)}
         ></div>
+
         <div
           id="display"
-          dangerouslySetInnerHTML={createResultHtml(this.state.input)}
+          dangerouslySetInnerHTML={createResultHtml(this.state.result)}
         ></div>
+
+        <div
+          id="display2"
+          dangerouslySetInnerHTML={{
+            __html: "(on key press)temp: " + this.state.temp
+          }}
+        ></div>
+
         <hr></hr>
         <div onKeyPress={this.handleKeyPress}>
           <button className="num-button" id="equals" onClick={this.handleClick}>
