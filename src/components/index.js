@@ -12,74 +12,145 @@ const nums = [
   "eight",
   "nine"
 ];
+let temp = "";
 
 class Calculator extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       formula: [],
-      result: "",
-      temp: []
+      result: "0"
     };
     this.handleKeyPress = this.handleKeyPress.bind(this);
-    /*this.handleClick = this.handleClick.bind(this);*/
+    this.handleClick = this.handleClick.bind(this);
   }
 
-  /*
   handleClick(event) {
-    //console.log(event.target.getAttribute("data-tip"));
-    const value = parseInt(event.target.getAttribute("data-tip"));
-  }*/
+    //  console.log(event.target.value);
+
+    switch (event.target.value) {
+      //enter
+      case "equals":
+        let expression = this.state.formula.join("");
+        let finalResult = eval(expression);
+        console.log(expression + "=" + finalResult);
+
+        this.setState({ result: finalResult });
+        break;
+
+      //clear
+      case "clear":
+        this.setState({
+          formula: [],
+          result: "0"
+        });
+        temp = "";
+        break;
+
+      default:
+        //IF HERE !!!!!
+        if (
+          event.target.value === "add" ||
+          event.target.value === "subtract" ||
+          event.target.value === "divide" ||
+          event.target.value === "multiply"
+        ) {
+          this.setState({
+            formula: [...this.state.formula, event.target.innerText],
+            result: event.target.innerText
+          });
+          temp = "";
+          //ELSE IF!!!!!!!!!!!!!!!!!!!!!!!!
+        }
+
+        //check for multiple periods
+
+        /* try {
+            if (matches.length < 2) {
+              if (test === false) {
+                this.setState({
+                  formula: [...this.state.formula, event.target.innerText],
+                  result: temp
+                });
+              }
+            }
+          } catch (error) {
+            console.error(error);
+          }*/
+        //ELSE!!!
+        else {
+          temp += event.target.innerText;
+          //code to find multiple zeroes at the beginning
+          const regex = /(^[0])/;
+          let test = regex.test(temp);
+          //code to check for multiple periods
+          const regex2 = /(.\..{2,})/g;
+          let test2 = regex2.test(temp);
+          //console.log(test2 + " " + temp);
+          //console.log(test + temp);
+
+          if (test2 === true) {
+          }
+
+          //console.log("tempCleaned " + temp);
+
+          if (test === false) {
+            this.setState({
+              formula: [...this.state.formula, event.target.innerText],
+              result: temp
+            });
+          } else {
+            this.setState({
+              result: "0"
+            });
+            temp = "";
+          }
+        }
+        break;
+    }
+  }
 
   handleKeyPress(event) {
-    console.log(event.keyCode);
-    //console.log(event.key);
+    /*
     switch (event.keyCode) {
       //enter
       case 13:
-        const expression = this.state.formula.join("");
-        const resultValue = expression; //eval(expression);
-
-        this.setState({
-          temp: [],
-          formula: [],
-          result: resultValue
-        });
+        let expression = this.state.formula.join("");
+        console.log(expression + "=" + eval(expression));
         break;
 
       //clear
       case 67:
         this.setState({
-          temp: [],
           formula: [],
           result: ""
         });
+        temp = "";
         break;
 
       default:
-        // console.log(event.key);
-        let arr = this.state.temp;
-
-        this.setState({
-          //temp: [event.key]
-          temp: [...arr, event.key]
-        });
-
-        console.log(this.state.temp.join(""));
-
-        //when a new operation sign is added
-        if (event.key === "+" || event.key === "=") {
-          let newArr = this.state.formula;
-
+        if (
+          event.key === "+" ||
+          event.key === "-" ||
+          event.key === "/" ||
+          event.key === "*"
+        ) {
           this.setState({
-            formula: [this.state.formula, this.state.temp],
-            temp: []
+            formula: [...this.state.formula, event.key],
+            result: event.key
           });
-
-          console.log(newArr.join(""));
+          temp = "";
+        } else {
+          temp += event.key;
+          this.setState({
+            formula: [...this.state.formula, event.key],
+            result: temp
+          });
         }
+
+        console.log(this.state.formula);
         break;
-    }
+    }*/
   }
 
   componentDidMount() {
@@ -91,15 +162,25 @@ class Calculator extends React.Component {
   }
 
   render() {
+    function createOperationtHtml(inputArr) {
+      return {
+        __html: "<h5> (on +-/*)operation: " + inputArr.join("") + "</h5>"
+      };
+    }
     function createResultHtml(result) {
       return {
         __html: "<h5> (enter) result: " + result + "</h5>"
       };
     }
 
-    function createOperationtHtml(inputArr) {
+    function createOperationtHtmlTests(inputArr) {
       return {
-        __html: "<h5> (on +-/*)operation: " + inputArr.join("") + "</h5>"
+        __html: "<h5>" + inputArr.join("") + "</h5>"
+      };
+    }
+    function createResultHtmlTests(result) {
+      return {
+        __html: "<h5>" + result + "</h5>"
       };
     }
 
@@ -109,7 +190,7 @@ class Calculator extends React.Component {
           id={elem}
           key={i}
           className="num-button"
-          data-tip={i}
+          value={i}
           onClick={this.handleClick}
         >
           {i}
@@ -122,32 +203,38 @@ class Calculator extends React.Component {
       <div id="display-div">
         <div
           id="operation"
-          dangerouslySetInnerHTML={createOperationtHtml(this.state.formula)}
+          dangerouslySetInnerHTML={createOperationtHtmlTests(
+            this.state.formula
+          )}
         ></div>
 
         <div
           id="display"
-          dangerouslySetInnerHTML={createResultHtml(this.state.result)}
-        ></div>
-
-        <div
-          id="display2"
-          dangerouslySetInnerHTML={{
-            __html: "(on key press)temp: " + this.state.temp
-          }}
+          dangerouslySetInnerHTML={createResultHtmlTests(this.state.result)}
         ></div>
 
         <hr></hr>
         <div onKeyPress={this.handleKeyPress}>
-          <button className="num-button" id="equals" onClick={this.handleClick}>
+          <button
+            className="num-button"
+            id="equals"
+            value="equals"
+            onClick={this.handleClick}
+          >
             =
           </button>
-          <button className="num-button" id="add" onClick={this.handleClick}>
+          <button
+            className="num-button"
+            id="add"
+            value="add"
+            onClick={this.handleClick}
+          >
             +
           </button>
           <button
             className="num-button"
             id="subtract"
+            value="subtract"
             onClick={this.handleClick}
           >
             -
@@ -155,21 +242,33 @@ class Calculator extends React.Component {
           <button
             className="num-button"
             id="multiply"
+            value="multiply"
             onClick={this.handleClick}
           >
             *
           </button>
-          <button className="num-button" id="divide" onClick={this.handleClick}>
+          <button
+            className="num-button"
+            id="divide"
+            value="divide"
+            onClick={this.handleClick}
+          >
             /
           </button>
           <button
             className="num-button"
             id="decimal"
+            value="decimal"
             onClick={this.handleClick}
           >
             .
           </button>
-          <button className="num-button" id="clear" onClick={this.handleClick}>
+          <button
+            className="num-button"
+            id="clear"
+            value="clear"
+            onClick={this.handleClick}
+          >
             C
           </button>
         </div>
