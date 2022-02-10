@@ -20,7 +20,7 @@ class Calculator extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      formula: [],
+      formula: [""],
       temp: "",
       result: "0"
     };
@@ -29,12 +29,13 @@ class Calculator extends React.Component {
 
   handleClick(event) {
     //  console.log(event.target.value);
+    input += event.target.value;
+
     switch (event.target.value) {
       //clear
       case "clear":
         this.setState({
           formula: [],
-          temp: "",
           result: "0"
         });
         decimalCounter = 0;
@@ -46,41 +47,48 @@ class Calculator extends React.Component {
       case "/":
       case "*":
         decimalCounter = 0;
-        input += event.target.value;
         this.setState({
-          result: input
+          formula: [...this.state.formula, event.target.value],
+          result: event.target.value
         });
+        input = "";
+        break;
+      case "equals":
+        decimalCounter = 0;
+        let generatedFormula = this.state.formula.join("");
+        //console.log(this.state.formula + "  =  " + eval(generatedFormula));
 
+        let formulaTest = [...this.state.formula, this.state.result];
+        console.log(formulaTest);
+
+        /*this.setState({
+          result: eval(generatedFormula)
+        });*/
+        input = "";
         break;
       default:
         const regex = /(^[0])/;
+        const regexReplace = /^[0]*/;
+        let sanitizedInput = input;
+        let zeroesTest = regex.test(input);
+
+        //console.log("zeroesTest " + zeroesTest + " input " + input);
+
+        if (zeroesTest === true) {
+          sanitizedInput = input.replace(regexReplace, "0");
+          input = sanitizedInput;
+        }
+
+        //console.log("after" + " " + sanitizedInput);
 
         //validate multiple decimal points
         if (decimalCounter === 0 && event.target.id === "decimal") {
-          //console.log("decimalC 0 y viene un buton decimal");
-          input += event.target.value;
-
           decimalCounter = 1;
-        } else if (decimalCounter === 1) {
-          if (event.target.id !== "decimal") {
-            //console.log("decimalC 1 y viene otro tipo de boton");
-            input += event.target.value;
-          }
-        } else {
-          input += event.target.value;
-
-          let zeroesTest = regex.test(input);
-          if (zeroesTest === true) {
-            //console.log("before " + input);
-            let newInput = "";
-            if (input.length > 1) {
-              newInput = input.slice(0, -1);
-            } else {
-              newInput = 0;
-            }
-            //console.log("after " + newInput);
-            input = newInput;
-          }
+        } else if (decimalCounter === 1 && event.target.id === "decimal") {
+          //console.log("before" + " " + input);
+          sanitizedInput = input.slice(0, -1);
+          input = sanitizedInput;
+          //console.log("after" + " " + sanitizedInput);
         }
 
         this.setState({
