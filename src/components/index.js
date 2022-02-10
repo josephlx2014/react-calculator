@@ -48,14 +48,14 @@ class Calculator extends React.Component {
       case "*":
         decimalCounter = 0;
         this.setState({
-          formula: [...this.state.formula, event.target.value],
+          //formula: [...this.state.formula, event.target.value],
           result: event.target.value
         });
         input = "";
         break;
       case "equals":
         decimalCounter = 0;
-        let generatedFormula = this.state.formula.join("");
+        //let generatedFormula = this.state.formula.join("");
         //console.log(this.state.formula + "  =  " + eval(generatedFormula));
 
         let formulaTest = [...this.state.formula, this.state.result];
@@ -67,30 +67,38 @@ class Calculator extends React.Component {
         input = "";
         break;
       default:
-        const regex = /(^[0])/;
-        const regexReplace = /^[0]*/;
+        //
+        const regexZeroes = /^[0]{1,}/;
+        const regexDecimals = /.*[.].*/g; //Detects if its a decimal number
+        const numbersRegex = /[1-9.]/g; // Detects only numbers from 1 to 9
+
         let sanitizedInput = input;
-        let zeroesTest = regex.test(input);
+        //Zero validations
 
-        //console.log("zeroesTest " + zeroesTest + " input " + input);
+        if (regexZeroes.test(input)) {
+          //&& regexDecimals.test(input) === false) {
+          // console.log("Executing");
+          try {
+            sanitizedInput = input.match(numbersRegex);
+            input = sanitizedInput.join("");
+          } catch (error) {
+            input = 0;
+          }
 
-        if (zeroesTest === true) {
-          sanitizedInput = input.replace(regexReplace, "0");
-          input = sanitizedInput;
+          if (regexDecimals.test(input)) {
+            input = "0" + input;
+          }
         }
-
-        //console.log("after" + " " + sanitizedInput);
 
         //validate multiple decimal points
         if (decimalCounter === 0 && event.target.id === "decimal") {
           decimalCounter = 1;
         } else if (decimalCounter === 1 && event.target.id === "decimal") {
-          //console.log("before" + " " + input);
           sanitizedInput = input.slice(0, -1);
           input = sanitizedInput;
-          //console.log("after" + " " + sanitizedInput);
         }
 
+        //Showing sanitized input in the display
         this.setState({
           result: input
         });
