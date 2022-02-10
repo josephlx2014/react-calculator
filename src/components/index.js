@@ -15,7 +15,7 @@ const nums = [
 
 let input = "";
 let decimalCounter = 0;
-
+let mutFormula = "";
 class Calculator extends React.Component {
   constructor(props) {
     super(props);
@@ -41,7 +41,6 @@ class Calculator extends React.Component {
         decimalCounter = 0;
         input = "";
         break;
-
       case "+":
       case "-":
       case "/":
@@ -51,20 +50,24 @@ class Calculator extends React.Component {
           //formula: [...this.state.formula, event.target.value],
           result: event.target.value
         });
+        mutFormula += input;
+        //console.log(mutFormula);
         input = "";
         break;
       case "equals":
         decimalCounter = 0;
         //let generatedFormula = this.state.formula.join("");
         //console.log(this.state.formula + "  =  " + eval(generatedFormula));
+        mutFormula += this.state.result;
+        console.log(mutFormula);
+        let finalResult = eval(mutFormula);
+        this.setState({
+          result: finalResult
+        });
+        mutFormula = "";
+        input = finalResult;
 
-        let formulaTest = [...this.state.formula, this.state.result];
-        console.log(formulaTest);
-
-        /*this.setState({
-          result: eval(generatedFormula)
-        });*/
-        input = "";
+        console.log("Resultado: " + finalResult);
         break;
       default:
         //
