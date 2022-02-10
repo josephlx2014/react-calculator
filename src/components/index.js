@@ -47,23 +47,38 @@ class Calculator extends React.Component {
       case "*":
         decimalCounter = 0;
         this.setState({
-          //formula: [...this.state.formula, event.target.value],
           result: event.target.value
         });
         mutFormula += input;
-        //console.log(mutFormula);
+
         input = "";
         break;
       case "equals":
         decimalCounter = 0;
-        //let generatedFormula = this.state.formula.join("");
-        //console.log(this.state.formula + "  =  " + eval(generatedFormula));
         mutFormula += this.state.result;
-        console.log(mutFormula);
-        let finalResult = eval(mutFormula);
+
+        //const regex = /([+\/*-]?[^+\/*-]+)/gm;
+        //const regex = /[+\/*\-]?[^+\/*\-]+[^\-\d]/g;
+        //const regex = /[\-]{0,1}[\d]?[^\-]{0,1}[^\d]/g;
+        //const regex = /([+*\/][0-9]+)|([\-][0-9]+)|([0-9]+)/gm;
+        //const regex = /([+*\/][0-9]+)|([+*\/-][\-][0-9]+)|([0-9]+)/gm;
+        //const regex = /([+*\/][0-9]+)|([+*\/\-][\-][0-9]+)|([0-9]+)|([\-][0-9]+)/gm;
+        const regex = /([+*\/][0-9.]+)|([+*\/\-][\-][0-9.]+)|([0-9.]+)|([\-][0-9.]+)/gm;
+        //[+\/*-]?[^+\/*-]+(^[\-\d])?
+        let formulaArr = mutFormula.match(regex);
+
+        console.log(formulaArr);
+        let validatedFormula = formulaArr.join("");
+
+        console.log(validatedFormula);
+        //publishing state
+        let finalResult = eval(validatedFormula);
+
         this.setState({
           result: finalResult
         });
+
+        //resetting
         mutFormula = "";
         input = finalResult;
 
@@ -76,18 +91,15 @@ class Calculator extends React.Component {
         const numbersRegex = /[1-9.]/g; // Detects only numbers from 1 to 9
 
         let sanitizedInput = input;
-        //Zero validations
 
+        //Zero validations
         if (regexZeroes.test(input)) {
-          //&& regexDecimals.test(input) === false) {
-          // console.log("Executing");
           try {
             sanitizedInput = input.match(numbersRegex);
             input = sanitizedInput.join("");
           } catch (error) {
             input = 0;
           }
-
           if (regexDecimals.test(input)) {
             input = "0" + input;
           }
