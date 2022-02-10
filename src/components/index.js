@@ -12,172 +12,92 @@ const nums = [
   "eight",
   "nine"
 ];
-let temp = "";
+
+let input = "";
+let decimalCounter = 0;
 
 class Calculator extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       formula: [],
+      temp: "",
       result: "0"
     };
-    this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleClick = this.handleClick.bind(this);
   }
 
   handleClick(event) {
     //  console.log(event.target.value);
-
     switch (event.target.value) {
-      //enter
-      case "equals":
-        let expression = this.state.formula.join("");
-        let finalResult = eval(expression);
-        console.log(expression + "=" + finalResult);
-
-        this.setState({ result: finalResult });
-        break;
-
       //clear
       case "clear":
         this.setState({
           formula: [],
+          temp: "",
           result: "0"
         });
-        temp = "";
+        decimalCounter = 0;
+        input = "";
         break;
 
+      case "+":
+      case "-":
+      case "/":
+      case "*":
+        decimalCounter = 0;
+        input += event.target.value;
+        this.setState({
+          result: input
+        });
+
+        break;
       default:
-        //IF HERE !!!!!
-        if (
-          event.target.value === "add" ||
-          event.target.value === "subtract" ||
-          event.target.value === "divide" ||
-          event.target.value === "multiply"
-        ) {
-          this.setState({
-            formula: [...this.state.formula, event.target.innerText],
-            result: event.target.innerText
-          });
-          temp = "";
-          //ELSE IF!!!!!!!!!!!!!!!!!!!!!!!!
-        }
+        const regex = /(^[0])/;
 
-        //check for multiple periods
+        //validate multiple decimal points
+        if (decimalCounter === 0 && event.target.id === "decimal") {
+          //console.log("decimalC 0 y viene un buton decimal");
+          input += event.target.value;
 
-        /* try {
-            if (matches.length < 2) {
-              if (test === false) {
-                this.setState({
-                  formula: [...this.state.formula, event.target.innerText],
-                  result: temp
-                });
-              }
+          decimalCounter = 1;
+        } else if (decimalCounter === 1) {
+          if (event.target.id !== "decimal") {
+            //console.log("decimalC 1 y viene otro tipo de boton");
+            input += event.target.value;
+          }
+        } else {
+          input += event.target.value;
+
+          let zeroesTest = regex.test(input);
+          if (zeroesTest === true) {
+            //console.log("before " + input);
+            let newInput = "";
+            if (input.length > 1) {
+              newInput = input.slice(0, -1);
+            } else {
+              newInput = 0;
             }
-          } catch (error) {
-            console.error(error);
-          }*/
-        //ELSE!!!
-        else {
-          temp += event.target.innerText;
-          //code to find multiple zeroes at the beginning
-          const regex = /(^[0])/;
-          let test = regex.test(temp);
-          //code to check for multiple periods
-          const regex2 = /(.\..{2,})/g;
-          let test2 = regex2.test(temp);
-          //console.log(test2 + " " + temp);
-          //console.log(test + temp);
-
-          if (test2 === true) {
-          }
-
-          //console.log("tempCleaned " + temp);
-
-          if (test === false) {
-            this.setState({
-              formula: [...this.state.formula, event.target.innerText],
-              result: temp
-            });
-          } else {
-            this.setState({
-              result: "0"
-            });
-            temp = "";
+            //console.log("after " + newInput);
+            input = newInput;
           }
         }
+
+        this.setState({
+          result: input
+        });
+
         break;
     }
-  }
-
-  handleKeyPress(event) {
-    /*
-    switch (event.keyCode) {
-      //enter
-      case 13:
-        let expression = this.state.formula.join("");
-        console.log(expression + "=" + eval(expression));
-        break;
-
-      //clear
-      case 67:
-        this.setState({
-          formula: [],
-          result: ""
-        });
-        temp = "";
-        break;
-
-      default:
-        if (
-          event.key === "+" ||
-          event.key === "-" ||
-          event.key === "/" ||
-          event.key === "*"
-        ) {
-          this.setState({
-            formula: [...this.state.formula, event.key],
-            result: event.key
-          });
-          temp = "";
-        } else {
-          temp += event.key;
-          this.setState({
-            formula: [...this.state.formula, event.key],
-            result: temp
-          });
-        }
-
-        console.log(this.state.formula);
-        break;
-    }*/
-  }
-
-  componentDidMount() {
-    document.addEventListener("keydown", this.handleKeyPress, false);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener("keydown", this.handleKeyPress, false);
   }
 
   render() {
-    function createOperationtHtml(inputArr) {
-      return {
-        __html: "<h5> (on +-/*)operation: " + inputArr.join("") + "</h5>"
-      };
-    }
-    function createResultHtml(result) {
-      return {
-        __html: "<h5> (enter) result: " + result + "</h5>"
-      };
-    }
-
     function createOperationtHtmlTests(inputArr) {
       return {
         __html: "<h5>" + inputArr.join("") + "</h5>"
       };
     }
+
     function createResultHtmlTests(result) {
       return {
         __html: "<h5>" + result + "</h5>"
@@ -214,7 +134,7 @@ class Calculator extends React.Component {
         ></div>
 
         <hr></hr>
-        <div onKeyPress={this.handleKeyPress}>
+        <div>
           <button
             className="num-button"
             id="equals"
@@ -226,7 +146,7 @@ class Calculator extends React.Component {
           <button
             className="num-button"
             id="add"
-            value="add"
+            value="+"
             onClick={this.handleClick}
           >
             +
@@ -234,7 +154,7 @@ class Calculator extends React.Component {
           <button
             className="num-button"
             id="subtract"
-            value="subtract"
+            value="-"
             onClick={this.handleClick}
           >
             -
@@ -242,7 +162,7 @@ class Calculator extends React.Component {
           <button
             className="num-button"
             id="multiply"
-            value="multiply"
+            value="*"
             onClick={this.handleClick}
           >
             *
@@ -250,7 +170,7 @@ class Calculator extends React.Component {
           <button
             className="num-button"
             id="divide"
-            value="divide"
+            value="/"
             onClick={this.handleClick}
           >
             /
@@ -258,7 +178,7 @@ class Calculator extends React.Component {
           <button
             className="num-button"
             id="decimal"
-            value="decimal"
+            value="."
             onClick={this.handleClick}
           >
             .
